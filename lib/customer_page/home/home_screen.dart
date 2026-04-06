@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -328,13 +329,20 @@ class _CategoryIcon extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: url != null
-          ? Image.network(
-              url,
+          ? CachedNetworkImage(
+              imageUrl: url,
               fit: BoxFit.cover,
-              headers: const {'Accept': 'image/webp,image/png,image/jpeg,image/*'},
-              loadingBuilder: (_, child, progress) =>
-                  progress == null ? child : fallback,
-              errorBuilder: (_, __, ___) => fallback,
+              httpHeaders: const {'Accept': 'image/avif,image/webp,image/png,image/jpeg,image/*'},
+              placeholder: (_, __) => Center(
+                child: SizedBox(
+                  width: size * 0.4,
+                  height: size * 0.4,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: kPrimary.withValues(alpha: 0.4)),
+                ),
+              ),
+              errorWidget: (_, __, ___) => fallback,
             )
           : fallback,
     );
