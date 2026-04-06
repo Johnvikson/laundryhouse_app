@@ -246,7 +246,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                   );
                                 } else {
                                   Navigator.pushReplacementNamed(
-                                      context, '/role-select');
+                                      context, '/login');
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -280,7 +280,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             SizedBox(height: h * 0.008),
                             TextButton(
                               onPressed: () => Navigator.pushReplacementNamed(
-                                  context, '/role-select'),
+                                  context, '/login'),
                               child: Text(
                                 'Skip',
                                 style: TextStyle(

@@ -14,7 +14,6 @@ import 'customer_page/profile/profile_screen.dart';
 import 'rider_page/auth/rider_login_screen.dart';
 import 'rider_page/home/rider_home_screen.dart';
 import 'onboarding/onboarding_screen.dart';
-import 'onboarding/role_selection_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +53,6 @@ class MyApp extends StatelessWidget {
         home: const Splash1Screen(),
         routes: {
           '/onboarding': (context) => const OnboardingScreen(),
-          '/role-select': (context) => const RoleSelectionScreen(),
           '/login': (context) => const CustomerLoginScreen(),
           '/signup': (context) => const CustomerLoginScreen(),
           '/home': (context) => const CustomerHomeScreen(),
