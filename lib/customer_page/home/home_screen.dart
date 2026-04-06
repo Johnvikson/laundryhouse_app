@@ -46,13 +46,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return map;
   }
 
-  // First icon value found per category
+  // Best icon per category: prefer any URL over a plain text name.
+  // This means uploading the icon on ANY one service-type row is enough.
   Map<String, String?> get _categoryImageUrls {
     final map = <String, String?>{};
     for (final item in _priceItems) {
       final cat = item['category'] as String;
-      if (!map.containsKey(cat)) {
-        map[cat] = item['icon'] as String?;
+      final icon = item['icon'] as String?;
+      final existing = map[cat];
+      // Keep existing if it's already a URL; otherwise take whatever we have
+      if (existing == null || existing.isEmpty) {
+        map[cat] = icon;
+      } else if (!(existing.startsWith('http')) &&
+          icon != null && icon.startsWith('http')) {
+        map[cat] = icon; // upgrade text name → real URL
       }
     }
     return map;
