@@ -45,13 +45,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return map;
   }
 
-  // First image_url found per category
+  // First icon value found per category
   Map<String, String?> get _categoryImageUrls {
     final map = <String, String?>{};
     for (final item in _priceItems) {
       final cat = item['category'] as String;
       if (!map.containsKey(cat)) {
-        map[cat] = item['image_url'] as String?;
+        map[cat] = item['icon'] as String?;
       }
     }
     return map;
@@ -67,7 +67,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => _ServicePickerSheet(category: category, items: items, imageUrl: imageUrl),
+      builder: (_) => _ServicePickerSheet(category: category, items: items, icon: imageUrl),
     );
   }
 
@@ -183,7 +183,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 childAspectRatio: 2.6,
                 children: _categories.map((cat) => _CategoryBadge(
                   category: cat,
-                  imageUrl: _categoryImageUrls[cat],
+                  icon: _categoryImageUrls[cat],
                   onTap: () => _openCategoryDialog(cat),
                 )).toList(),
               ),
@@ -244,10 +244,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
 // ─── Category icon helper ─────────────────────────────────────────────────────
 
-String categoryEmoji(String category) {
-  final c = category.toLowerCase().trim();
+String categoryEmoji(String nameOrIcon) {
+  final c = nameOrIcon.toLowerCase().trim();
   if (c.contains('trouser') || c.contains('pant')) return '👖';
-  if (c.contains('shirt') || c.contains('top') || c.contains('blouse')) return '👕';
+  if (c == 'shirt' || c.contains('shirt') || c.contains('top') || c.contains('blouse')) return '👕';
   if (c.contains('dress')) return '👗';
   if (c.contains('suit') || c.contains('blazer') || c.contains('jacket')) return '🧥';
   if (c.contains('skirt')) return '🩱';
@@ -264,19 +264,30 @@ String categoryEmoji(String category) {
   if (c.contains('coat')) return '🧥';
   if (c.contains('jumpsuit') || c.contains('overall')) return '🥻';
   if (c.contains('short')) return '🩳';
+  if (c.contains('agbada') || c.contains('native') || c.contains('senator')) return '🥻';
+  if (c.contains('gown')) return '👗';
   return '👔';
 }
 
 // ─── Category icon widget ─────────────────────────────────────────────────────
 
 class _CategoryIcon extends StatelessWidget {
-  final String? imageUrl;
+  final String? icon; // value from price_list.icon column
   final String category;
   final double size;
-  const _CategoryIcon({this.imageUrl, required this.category, required this.size});
+  const _CategoryIcon({this.icon, required this.category, required this.size});
+
+  bool get _isUrl => icon != null && icon!.startsWith('http');
 
   @override
   Widget build(BuildContext context) {
+    final fallback = Center(
+      child: Text(
+        categoryEmoji(icon ?? category), // use icon name for emoji too
+        style: TextStyle(fontSize: size * 0.55),
+      ),
+    );
+
     return Container(
       width: size,
       height: size,
@@ -285,19 +296,13 @@ class _CategoryIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.22),
       ),
       clipBehavior: Clip.antiAlias,
-      child: imageUrl != null && imageUrl!.isNotEmpty
+      child: _isUrl
           ? Image.network(
-              imageUrl!,
+              icon!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Center(
-                child: Text(categoryEmoji(category),
-                    style: TextStyle(fontSize: size * 0.55)),
-              ),
+              errorBuilder: (_, __, ___) => fallback,
             )
-          : Center(
-              child: Text(categoryEmoji(category),
-                  style: TextStyle(fontSize: size * 0.55)),
-            ),
+          : fallback,
     );
   }
 }
@@ -306,9 +311,9 @@ class _CategoryIcon extends StatelessWidget {
 
 class _CategoryBadge extends StatelessWidget {
   final String category;
-  final String? imageUrl;
+  final String? icon;
   final VoidCallback onTap;
-  const _CategoryBadge({required this.category, this.imageUrl, required this.onTap});
+  const _CategoryBadge({required this.category, this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +332,7 @@ class _CategoryBadge extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
           children: [
-            _CategoryIcon(imageUrl: imageUrl, category: category, size: 28),
+            _CategoryIcon(icon: icon, category: category, size: 28),
             const SizedBox(width: 6),
             Expanded(child: Text(category, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
             const Icon(Icons.add, size: 13, color: Colors.grey),
@@ -353,7 +358,7 @@ class _AddedItemRow extends StatelessWidget {
       decoration: BoxDecoration(color: const Color(0xFFF9FAFB), borderRadius: BorderRadius.circular(10)),
       child: Row(
         children: [
-          _CategoryIcon(imageUrl: item.imageUrl, category: item.category, size: 36),
+          _CategoryIcon(icon: item.imageUrl, category: item.category, size: 36), // item.imageUrl holds the icon value
           const SizedBox(width: 10),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -377,8 +382,8 @@ class _AddedItemRow extends StatelessWidget {
 class _ServicePickerSheet extends StatefulWidget {
   final String category;
   final List<Map<String, dynamic>> items;
-  final String? imageUrl;
-  const _ServicePickerSheet({required this.category, required this.items, this.imageUrl});
+  final String? icon;
+  const _ServicePickerSheet({required this.category, required this.items, this.icon});
   @override
   State<_ServicePickerSheet> createState() => _ServicePickerSheetState();
 }
@@ -399,7 +404,7 @@ class _ServicePickerSheetState extends State<_ServicePickerSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(children: [
-              _CategoryIcon(imageUrl: widget.imageUrl, category: widget.category, size: 36),
+              _CategoryIcon(icon: widget.icon, category: widget.category, size: 36),
               const SizedBox(width: 10),
               Text(widget.category, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ]),
@@ -436,7 +441,7 @@ class _ServicePickerSheetState extends State<_ServicePickerSheet> {
                       serviceType: service,
                       quantity: qty,
                       pricePerItem: (item['price_per_item'] as num).toDouble(),
-                      imageUrl: widget.imageUrl,
+                      imageUrl: widget.icon,
                     ));
                   }
                 });
