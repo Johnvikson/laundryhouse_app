@@ -727,14 +727,14 @@ class _SummaryCardState extends State<_SummaryCard> {
       '&customer[name]=${Uri.encodeComponent(user.name ?? '')}'
       '&customizations[title]=LaundryHouse&customizations[description]=Order $orderCode',
     );
-    if (await canLaunchUrl(url)) {
+    try {
       await launchUrl(url, mode: LaunchMode.externalApplication);
       if (mounted) {
         widget.order.clearCart();
         Navigator.pushNamed(context, '/track');
       }
-    } else {
-      _snack('Could not open payment page');
+    } catch (e) {
+      _snack('Could not open payment page: $e');
     }
   }
 

@@ -122,12 +122,12 @@ class _CustomerTrackScreenState extends State<CustomerTrackScreen> {
       '&customer[name]=${Uri.encodeComponent(user.name ?? '')}'
       '&customizations[title]=LaundryHouse&customizations[description]=Order ${order['order_code']}',
     );
-    if (await canLaunchUrl(url)) {
+    try {
       await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open payment page')),
+          SnackBar(content: Text('Could not open payment page: $e')),
         );
       }
     }
