@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/order_provider.dart';
 import '../../services/supabase_service.dart';
+import '../../widgets/notifications_sheet.dart';
 
 const kBtnGradient = [Color(0xFF0891B2), Color(0xFF16A34A)];
 const kPrimary = Color(0xFF9333EA);
@@ -127,7 +128,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
               const SizedBox(width: 4),
               IconButton(
-                onPressed: () => Navigator.pushNamed(context, '/track'),
+                onPressed: () {
+                  final userId = context.read<UserProvider>().userId;
+                  if (userId != null) showCustomerNotificationsSheet(context, userId);
+                },
                 icon: const Icon(Icons.notifications_outlined, size: 22, color: Color(0xFF9333EA)),
                 tooltip: 'Notifications',
               ),

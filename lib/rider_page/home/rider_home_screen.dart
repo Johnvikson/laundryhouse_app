@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../providers/user_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/supabase_service.dart';
+import '../../widgets/notifications_sheet.dart';
 
 const _kPrimary = Color(0xFF9333EA);
 const _kCyan = Color(0xFF0891B2);
@@ -308,7 +309,10 @@ class _RiderHomeScreenState extends State<RiderHomeScreen>
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  final riderId = _riderProfile?['id'] as String?;
+                  if (riderId != null) showRiderNotificationsSheet(context, riderId);
+                },
                 icon: const Icon(Icons.notifications_outlined, size: 22, color: _kPrimary),
                 tooltip: 'Notifications',
               ),
