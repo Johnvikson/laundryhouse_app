@@ -728,8 +728,11 @@ class _SummaryCardState extends State<_SummaryCard> {
       '&customer[name]=${Uri.encodeComponent(user.name ?? '')}'
       '&customizations[title]=LaundryHouse&customizations[description]=Order $orderCode';
 
-    final paid = await Navigator.push<bool>(
-      context,
+    // Capture navigator before async gap to avoid context-after-await assertion
+    final navigator = Navigator.of(context);
+    final order = widget.order;
+
+    final paid = await navigator.push<bool>(
       MaterialPageRoute(
         builder: (_) => PaymentWebViewScreen(
           paymentUrl: paymentUrl,
@@ -739,8 +742,8 @@ class _SummaryCardState extends State<_SummaryCard> {
     );
 
     if (paid == true && mounted) {
-      widget.order.clearCart();
-      Navigator.pushNamed(context, '/track');
+      order.clearCart();
+      navigator.pushNamed('/track');
     }
   }
 

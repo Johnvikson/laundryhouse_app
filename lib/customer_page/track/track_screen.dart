@@ -124,8 +124,10 @@ class _CustomerTrackScreenState extends State<CustomerTrackScreen> {
       '&customer[name]=${Uri.encodeComponent(user.name ?? '')}'
       '&customizations[title]=LaundryHouse&customizations[description]=Order ${order['order_code']}';
 
-    await Navigator.push(
-      context,
+    // Capture navigator before async gap
+    final navigator = Navigator.of(context);
+
+    await navigator.push(
       MaterialPageRoute(
         builder: (_) => PaymentWebViewScreen(
           paymentUrl: paymentUrl,
