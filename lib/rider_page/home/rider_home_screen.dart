@@ -289,14 +289,9 @@ class _RiderHomeScreenState extends State<RiderHomeScreen>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: _kPrimary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.delivery_dining, size: 22, color: _kPrimary),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset('assets/images/icon.png', width: 40, height: 40, fit: BoxFit.cover),
               ),
               const SizedBox(width: 10),
               Expanded(
