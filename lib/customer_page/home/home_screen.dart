@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -277,13 +278,28 @@ class _CategoryIcon extends StatelessWidget {
   final double size;
   const _CategoryIcon({this.icon, required this.category, required this.size});
 
-  bool get _isUrl => icon != null && icon!.startsWith('http');
+  /// Resolves the icon value to an image URL, or null if it's just a name.
+  String? get _imageUrl {
+    if (icon == null || icon!.isEmpty) return null;
+    // Already a full URL
+    if (icon!.startsWith('http')) return icon;
+    // Filename stored in item-icons bucket (e.g. "trouser.png" or "shirt")
+    // Build the Supabase Storage public URL
+    try {
+      return Supabase.instance.client.storage
+          .from('item-icons')
+          .getPublicUrl(icon!);
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final url = _imageUrl;
     final fallback = Center(
       child: Text(
-        categoryEmoji(icon ?? category), // use icon name for emoji too
+        categoryEmoji(icon ?? category),
         style: TextStyle(fontSize: size * 0.55),
       ),
     );
@@ -296,9 +312,9 @@ class _CategoryIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.22),
       ),
       clipBehavior: Clip.antiAlias,
-      child: _isUrl
+      child: url != null
           ? Image.network(
-              icon!,
+              url,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => fallback,
             )
