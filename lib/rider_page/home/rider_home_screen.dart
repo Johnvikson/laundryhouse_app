@@ -308,6 +308,11 @@ class _RiderHomeScreenState extends State<RiderHomeScreen>
                 ),
               ),
               IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.notifications_outlined, size: 22, color: _kPrimary),
+                tooltip: 'Notifications',
+              ),
+              IconButton(
                 onPressed: _signOut,
                 icon: Icon(Icons.logout, size: 22, color: Colors.grey[600]),
               ),

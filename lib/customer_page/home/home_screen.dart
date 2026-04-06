@@ -126,6 +126,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               ),
               const SizedBox(width: 4),
+              IconButton(
+                onPressed: () => Navigator.pushNamed(context, '/track'),
+                icon: const Icon(Icons.notifications_outlined, size: 22, color: Color(0xFF9333EA)),
+                tooltip: 'Notifications',
+              ),
               IconButton(onPressed: _logout, icon: const Icon(Icons.logout, size: 20, color: Colors.grey)),
             ],
           ),
