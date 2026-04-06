@@ -26,6 +26,7 @@ dependencies:
   audioplayers: ^6.1.0
   image_picker: ^1.2.1
   cached_network_image: ^3.4.1
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:

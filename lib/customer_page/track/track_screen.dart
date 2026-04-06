@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../providers/user_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/supabase_service.dart';
+import '../../screens/payment_webview_screen.dart';
 
 const _kPrimary = Color(0xFF9333EA);
 const _kCyan = Color(0xFF0891B2);
@@ -113,24 +114,26 @@ class _CustomerTrackScreenState extends State<CustomerTrackScreen> {
     final pubKey = dotenv.env['FLUTTERWAVE_PUBLIC_KEY'] ?? '';
     final ref = 'LH_${DateTime.now().millisecondsSinceEpoch}';
     final amount = (order['total'] as num?)?.toDouble() ?? 0.0;
-    final url = Uri.parse(
+    const redirectUrl = 'https://viovlxpsrjpobysmydtq.supabase.co/functions/v1/flutterwave-webhook';
+    final paymentUrl =
       'https://checkout.flutterwave.com/v3/hosted/pay'
       '?public_key=$pubKey&tx_ref=$ref'
       '&amount=${amount.toStringAsFixed(2)}&currency=NGN'
-      '&redirect_url=https://viovlxpsrjpobysmydtq.supabase.co/functions/v1/flutterwave-webhook'
+      '&redirect_url=${Uri.encodeComponent(redirectUrl)}'
       '&customer[email]=${Uri.encodeComponent(user.email ?? '')}'
       '&customer[name]=${Uri.encodeComponent(user.name ?? '')}'
-      '&customizations[title]=LaundryHouse&customizations[description]=Order ${order['order_code']}',
+      '&customizations[title]=LaundryHouse&customizations[description]=Order ${order['order_code']}';
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PaymentWebViewScreen(
+          paymentUrl: paymentUrl,
+          redirectUrl: redirectUrl,
+        ),
+      ),
     );
-    try {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open payment page: $e')),
-        );
-      }
-    }
+    if (mounted) _loadOrders();
   }
 
   Future<void> _callPhone(String phone) async {

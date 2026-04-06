@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/order_provider.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/notifications_sheet.dart';
+import '../../screens/payment_webview_screen.dart';
 
 const kBtnGradient = [Color(0xFF0891B2), Color(0xFF16A34A)];
 const kPrimary = Color(0xFF9333EA);
@@ -718,23 +718,29 @@ class _SummaryCardState extends State<_SummaryCard> {
   Future<void> _launchPayment(String orderCode, UserProvider user, double amount) async {
     final pubKey = dotenv.env['FLUTTERWAVE_PUBLIC_KEY'] ?? '';
     final ref = 'LH_${DateTime.now().millisecondsSinceEpoch}';
-    final url = Uri.parse(
+    const redirectUrl = 'https://viovlxpsrjpobysmydtq.supabase.co/functions/v1/flutterwave-webhook';
+    final paymentUrl =
       'https://checkout.flutterwave.com/v3/hosted/pay'
       '?public_key=$pubKey&tx_ref=$ref'
       '&amount=${amount.toStringAsFixed(2)}&currency=NGN'
-      '&redirect_url=https://viovlxpsrjpobysmydtq.supabase.co/functions/v1/flutterwave-webhook'
+      '&redirect_url=${Uri.encodeComponent(redirectUrl)}'
       '&customer[email]=${Uri.encodeComponent(user.email ?? '')}'
       '&customer[name]=${Uri.encodeComponent(user.name ?? '')}'
-      '&customizations[title]=LaundryHouse&customizations[description]=Order $orderCode',
+      '&customizations[title]=LaundryHouse&customizations[description]=Order $orderCode';
+
+    final paid = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PaymentWebViewScreen(
+          paymentUrl: paymentUrl,
+          redirectUrl: redirectUrl,
+        ),
+      ),
     );
-    try {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (mounted) {
-        widget.order.clearCart();
-        Navigator.pushNamed(context, '/track');
-      }
-    } catch (e) {
-      _snack('Could not open payment page: $e');
+
+    if (paid == true && mounted) {
+      widget.order.clearCart();
+      Navigator.pushNamed(context, '/track');
     }
   }
 
