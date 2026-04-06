@@ -5,12 +5,14 @@ class OrderItem {
   final String serviceType;
   int quantity;
   final double pricePerItem;
+  final String? imageUrl;
 
   OrderItem({
     required this.category,
     required this.serviceType,
     required this.quantity,
     required this.pricePerItem,
+    this.imageUrl,
   });
 
   double get subtotal => quantity * pricePerItem;

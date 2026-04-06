@@ -72,7 +72,7 @@ class SupabaseService {
   static Future<List<Map<String, dynamic>>> getPriceItems() async {
     final res = await _client
         .from('price_list')
-        .select('id, category, service_type, price_per_item, is_special_care')
+        .select()
         .order('category')
         .order('service_type');
     return List<Map<String, dynamic>>.from(res);

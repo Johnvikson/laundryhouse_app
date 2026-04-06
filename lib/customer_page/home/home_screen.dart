@@ -45,16 +45,29 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return map;
   }
 
+  // First image_url found per category
+  Map<String, String?> get _categoryImageUrls {
+    final map = <String, String?>{};
+    for (final item in _priceItems) {
+      final cat = item['category'] as String;
+      if (!map.containsKey(cat)) {
+        map[cat] = item['image_url'] as String?;
+      }
+    }
+    return map;
+  }
+
   List<String> get _categories => _grouped.keys.toList();
 
   void _openCategoryDialog(String category) {
     final items = _grouped[category] ?? [];
+    final imageUrl = _categoryImageUrls[category];
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => _ServicePickerSheet(category: category, items: items),
+      builder: (_) => _ServicePickerSheet(category: category, items: items, imageUrl: imageUrl),
     );
   }
 
@@ -170,6 +183,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 childAspectRatio: 2.6,
                 children: _categories.map((cat) => _CategoryBadge(
                   category: cat,
+                  imageUrl: _categoryImageUrls[cat],
                   onTap: () => _openCategoryDialog(cat),
                 )).toList(),
               ),
@@ -253,12 +267,48 @@ String categoryEmoji(String category) {
   return '👔';
 }
 
+// ─── Category icon widget ─────────────────────────────────────────────────────
+
+class _CategoryIcon extends StatelessWidget {
+  final String? imageUrl;
+  final String category;
+  final double size;
+  const _CategoryIcon({this.imageUrl, required this.category, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: kPrimary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(size * 0.22),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: imageUrl != null && imageUrl!.isNotEmpty
+          ? Image.network(
+              imageUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Center(
+                child: Text(categoryEmoji(category),
+                    style: TextStyle(fontSize: size * 0.55)),
+              ),
+            )
+          : Center(
+              child: Text(categoryEmoji(category),
+                  style: TextStyle(fontSize: size * 0.55)),
+            ),
+    );
+  }
+}
+
 // ─── Category badge ───────────────────────────────────────────────────────────
 
 class _CategoryBadge extends StatelessWidget {
   final String category;
+  final String? imageUrl;
   final VoidCallback onTap;
-  const _CategoryBadge({required this.category, required this.onTap});
+  const _CategoryBadge({required this.category, this.imageUrl, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -277,13 +327,7 @@ class _CategoryBadge extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
           children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(6)),
-              alignment: Alignment.center,
-              child: Text(categoryEmoji(category), style: const TextStyle(fontSize: 16)),
-            ),
+            _CategoryIcon(imageUrl: imageUrl, category: category, size: 28),
             const SizedBox(width: 6),
             Expanded(child: Text(category, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
             const Icon(Icons.add, size: 13, color: Colors.grey),
@@ -309,13 +353,7 @@ class _AddedItemRow extends StatelessWidget {
       decoration: BoxDecoration(color: const Color(0xFFF9FAFB), borderRadius: BorderRadius.circular(10)),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
-            alignment: Alignment.center,
-            child: Text(categoryEmoji(item.category), style: const TextStyle(fontSize: 20)),
-          ),
+          _CategoryIcon(imageUrl: item.imageUrl, category: item.category, size: 36),
           const SizedBox(width: 10),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -339,7 +377,8 @@ class _AddedItemRow extends StatelessWidget {
 class _ServicePickerSheet extends StatefulWidget {
   final String category;
   final List<Map<String, dynamic>> items;
-  const _ServicePickerSheet({required this.category, required this.items});
+  final String? imageUrl;
+  const _ServicePickerSheet({required this.category, required this.items, this.imageUrl});
   @override
   State<_ServicePickerSheet> createState() => _ServicePickerSheetState();
 }
@@ -360,8 +399,8 @@ class _ServicePickerSheetState extends State<_ServicePickerSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(children: [
-              Text(categoryEmoji(widget.category), style: const TextStyle(fontSize: 24)),
-              const SizedBox(width: 8),
+              _CategoryIcon(imageUrl: widget.imageUrl, category: widget.category, size: 36),
+              const SizedBox(width: 10),
               Text(widget.category, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ]),
           ),
@@ -397,6 +436,7 @@ class _ServicePickerSheetState extends State<_ServicePickerSheet> {
                       serviceType: service,
                       quantity: qty,
                       pricePerItem: (item['price_per_item'] as num).toDouble(),
+                      imageUrl: widget.imageUrl,
                     ));
                   }
                 });
