@@ -228,6 +228,31 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 }
 
+// ─── Category icon helper ─────────────────────────────────────────────────────
+
+String categoryEmoji(String category) {
+  final c = category.toLowerCase().trim();
+  if (c.contains('trouser') || c.contains('pant')) return '👖';
+  if (c.contains('shirt') || c.contains('top') || c.contains('blouse')) return '👕';
+  if (c.contains('dress')) return '👗';
+  if (c.contains('suit') || c.contains('blazer') || c.contains('jacket')) return '🧥';
+  if (c.contains('skirt')) return '🩱';
+  if (c.contains('underwear') || c.contains('boxer') || c.contains('brief')) return '🩲';
+  if (c.contains('sock')) return '🧦';
+  if (c.contains('bed') || c.contains('sheet') || c.contains('duvet') || c.contains('pillow')) return '🛏️';
+  if (c.contains('towel')) return '🏖️';
+  if (c.contains('cap') || c.contains('hat')) return '🧢';
+  if (c.contains('sweater') || c.contains('hoodie') || c.contains('pullover')) return '🧶';
+  if (c.contains('tie') || c.contains('scarf')) return '🧣';
+  if (c.contains('shoe') || c.contains('boot')) return '👟';
+  if (c.contains('bag') || c.contains('purse')) return '👜';
+  if (c.contains('curtain') || c.contains('rug') || c.contains('carpet')) return '🪟';
+  if (c.contains('coat')) return '🧥';
+  if (c.contains('jumpsuit') || c.contains('overall')) return '🥻';
+  if (c.contains('short')) return '🩳';
+  return '👔';
+}
+
 // ─── Category badge ───────────────────────────────────────────────────────────
 
 class _CategoryBadge extends StatelessWidget {
@@ -253,9 +278,11 @@ class _CategoryBadge extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-              child: const Icon(Icons.dry_cleaning, size: 14, color: kPrimary),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(6)),
+              alignment: Alignment.center,
+              child: Text(categoryEmoji(category), style: const TextStyle(fontSize: 16)),
             ),
             const SizedBox(width: 6),
             Expanded(child: Text(category, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
@@ -283,9 +310,11 @@ class _AddedItemRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.dry_cleaning, size: 20, color: kPrimary),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
+            alignment: Alignment.center,
+            child: Text(categoryEmoji(item.category), style: const TextStyle(fontSize: 20)),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -331,7 +360,7 @@ class _ServicePickerSheetState extends State<_ServicePickerSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(children: [
-              const Icon(Icons.dry_cleaning, color: kPrimary),
+              Text(categoryEmoji(widget.category), style: const TextStyle(fontSize: 24)),
               const SizedBox(width: 8),
               Text(widget.category, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ]),
