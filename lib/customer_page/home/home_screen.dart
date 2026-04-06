@@ -278,20 +278,37 @@ class _CategoryIcon extends StatelessWidget {
   final double size;
   const _CategoryIcon({this.icon, required this.category, required this.size});
 
-  /// Resolves the icon value to an image URL, or null if it's just a name.
+  /// Resolves the icon value to a render URL Flutter can decode.
+  /// Converts any Supabase Storage object URL to the render/image endpoint
+  /// so Flutter receives webp instead of avif (avif needs Android 12+).
   String? get _imageUrl {
     if (icon == null || icon!.isEmpty) return null;
-    // Already a full URL
-    if (icon!.startsWith('http')) return icon;
-    // Filename stored in item-icons bucket (e.g. "trouser.png" or "shirt")
-    // Build the Supabase Storage public URL
-    try {
-      return Supabase.instance.client.storage
-          .from('item-icons')
-          .getPublicUrl(icon!);
-    } catch (_) {
-      return null;
+
+    String raw;
+    if (icon!.startsWith('http')) {
+      raw = icon!;
+    } else {
+      // plain filename — build full URL
+      try {
+        raw = Supabase.instance.client.storage
+            .from('item-icons')
+            .getPublicUrl(icon!);
+      } catch (_) {
+        return null;
+      }
     }
+
+    // Convert  .../storage/v1/object/public/...
+    //      to  .../storage/v1/render/image/public/...?format=webp&width=200
+    // This lets Supabase transcode avif → webp which Flutter supports everywhere.
+    if (raw.contains('/storage/v1/object/public/')) {
+      raw = raw.replaceFirst(
+          '/storage/v1/object/public/', '/storage/v1/render/image/public/');
+      final sep = raw.contains('?') ? '&' : '?';
+      raw = '$raw${sep}format=webp&width=200';
+    }
+
+    return raw;
   }
 
   @override
