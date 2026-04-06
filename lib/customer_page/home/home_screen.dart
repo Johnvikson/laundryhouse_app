@@ -278,9 +278,7 @@ class _CategoryIcon extends StatelessWidget {
   final double size;
   const _CategoryIcon({this.icon, required this.category, required this.size});
 
-  /// Resolves the icon value to a render URL Flutter can decode.
-  /// Converts any Supabase Storage object URL to the render/image endpoint
-  /// so Flutter receives webp instead of avif (avif needs Android 12+).
+  /// Returns the image URL to load, or null to show emoji fallback.
   String? get _imageUrl {
     if (icon == null || icon!.isEmpty) return null;
 
@@ -288,7 +286,7 @@ class _CategoryIcon extends StatelessWidget {
     if (icon!.startsWith('http')) {
       raw = icon!;
     } else {
-      // plain filename — build full URL
+      // plain filename — build Supabase public URL
       try {
         raw = Supabase.instance.client.storage
             .from('item-icons')
@@ -298,15 +296,8 @@ class _CategoryIcon extends StatelessWidget {
       }
     }
 
-    // Convert  .../storage/v1/object/public/...
-    //      to  .../storage/v1/render/image/public/...?format=webp&width=200
-    // This lets Supabase transcode avif → webp which Flutter supports everywhere.
-    if (raw.contains('/storage/v1/object/public/')) {
-      raw = raw.replaceFirst(
-          '/storage/v1/object/public/', '/storage/v1/render/image/public/');
-      final sep = raw.contains('?') ? '&' : '?';
-      raw = '$raw${sep}format=webp&width=200';
-    }
+    // Fix double-slash that Supabase sometimes produces (e.g. item-icons//file.avif)
+    raw = raw.replaceAll(RegExp(r'(?<!:)//'), '/');
 
     return raw;
   }
@@ -333,6 +324,9 @@ class _CategoryIcon extends StatelessWidget {
           ? Image.network(
               url,
               fit: BoxFit.cover,
+              headers: const {'Accept': 'image/webp,image/png,image/jpeg,image/*'},
+              loadingBuilder: (_, child, progress) =>
+                  progress == null ? child : fallback,
               errorBuilder: (_, __, ___) => fallback,
             )
           : fallback,

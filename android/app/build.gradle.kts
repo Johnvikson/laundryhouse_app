@@ -25,7 +25,7 @@ android {
         applicationId = "com.laundryhouse.laundryhouse_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 31  // AVIF image format requires Android 12+
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
